@@ -1,0 +1,19 @@
+.vercel
+
+Virtual Environment
+venv/
+.venv/
+
+Python cache
+pycache/
+*.pyc
+
+Local Data and Secrets
+.env
+dump.rdb
+.cache
+.cache.sqlite
+
+IDE / OS specific
+.vscode/
+.DS_Store

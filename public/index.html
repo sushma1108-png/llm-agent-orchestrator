@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akshay's LLM Agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        /* Custom Color Palette */
+        :root {
+            --queens-tart: #d1bdc5;
+            --venus-violet: #7974c3;
+            --emotional: #c66247;
+            --brandywine-raspberry: #504ca5;
+            --haunted-dreams: #363255;
+            --almost-black: #07071d;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--almost-black);
+        }
+        
+        .gradient-bg {
+            background-image: linear-gradient(to right, #504ca5, #7974c3);
+        }
+        .focus-glow {
+            box-shadow: 0 0 0 3px rgba(121, 116, 195, 0.4);
+        }
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        
+        /* Modal Animation */
+        .modal-animate-in { animation: fadeIn 0.3s ease-out; }
+        .modal-animate-out { animation: fadeOut 0.3s ease-in; }
+        .modal-panel-animate-in { animation: fadeInScaleUp 0.3s ease-out; }
+        .modal-panel-animate-out { animation: fadeOutScaleDown 0.3s ease-in; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        @keyframes fadeInScaleUp {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes fadeOutScaleDown {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.95); }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+
+    <!-- Main Chat Container -->
+    <div class="w-full max-w-2xl mx-auto bg-[#363255] rounded-2xl shadow-2xl flex flex-col h-[90vh] max-h-[800px]">
+        
+        <header class="gradient-bg text-white p-4 shadow-lg flex items-center justify-between rounded-t-2xl flex-shrink-0">
+            <div></div> <!-- Spacer -->
+            <h1 class="text-2xl font-bold">Akshay's Multi-Tool Agent</h1>
+            <!-- Info Icon Button -->
+            <button id="info-button" class="text-white hover:bg-white/20 rounded-full p-2 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            </button>
+        </header>
+
+        <!-- Chat messages container -->
+        <main id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-6">
+             <!-- Typing indicator, initially hidden -->
+            <div id="typing-indicator" class="hidden flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#504ca5] flex items-center justify-center flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="m12 3-1.9 4.8-4.8 1.9 4.8 1.9L12 16l1.9-4.8 4.8-1.9-4.8-1.9z"/><path d="M5 21v-4"/><path d="M3 19h4"/><path d="M19 21v-4"/><path d="M17 19h4"/></svg>
+                </div>
+                <div class="bg-[#d1bdc5] text-black p-3 rounded-lg shadow-md max-w-lg">
+                    <div class="flex items-center justify-center space-x-1">
+                        <div class="w-2 h-2 bg-gray-500 rounded-full animate-pulse"></div>
+                        <div class="w-2 h-2 bg-gray-500 rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
+                        <div class="w-2 h-2 bg-gray-500 rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer / Input area -->
+        <footer class="p-4 bg-[#363255] border-t border-gray-700/50 rounded-b-2xl flex-shrink-0">
+            <form id="chat-form" class="flex items-center gap-3">
+                <input type="text" id="message-input" placeholder="Ask me anything..." class="flex-1 p-3 bg-[#07071d] text-white rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#7974c3] transition-all" autocomplete="off">
+                <button type="submit" id="send-button" class="gradient-bg p-3 rounded-lg text-white font-semibold hover:opacity-90 transition-transform transform hover:scale-105 active:scale-95 flex items-center justify-center w-12 h-12">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 3 3 9-3 9 19-9Z"/><path d="m6 12h16"/></svg>
+                </button>
+            </form>
+        </footer>
+    </div>
+
+    <!-- Info Modal (initially hidden) -->
+    <div id="info-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div id="modal-backdrop" class="fixed inset-0 bg-black bg-opacity-75"></div>
+        
+        <!-- Modal Panel -->
+        <div class="relative bg-[var(--haunted-dreams)] text-white rounded-lg shadow-xl w-full max-w-lg p-6 border border-white/20 modal-panel-animate-in">
+            <button id="close-modal-button" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors text-3xl leading-none">&times;</button>
+            <h2 class="text-2xl font-bold mb-4 text-center gradient-bg bg-clip-text text-transparent">About This Agent</h2>
+            
+            <div class="space-y-4 text-gray-300">
+                <div>
+                    <h3 class="font-semibold text-lg text-white mb-1">How It Works</h3>
+                    <p>This is not a simple chatbot. It's an intelligent, multi-tool agent powered by a Large Language Model (LLM). When you ask a question, the LLM analyzes your intent and chooses the best tool for the job from its available skills. This allows it to perform real-world actions like fetching live data.</p>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-lg text-white mb-1">Agent Capabilities (Tools)</h3>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong class="text-[var(--venus-violet)]">Weather:</strong> Provides real-time weather forecasts.</li>
+                        <li><strong class="text-[var(--venus-violet)]">Stocks:</strong> Fetches the latest stock prices.</li>
+                        <li><strong class="text-[var(--venus-violet)]">News:</strong> Retrieves recent headlines on any topic.</li>
+                        <li><strong class="text-[var(--venus-violet)]">Wikipedia:</strong> Gets concise summaries from the encyclopedia.</li>
+                        <li><strong class="text-[var(--venus-violet)]">Calculator:</strong> Evaluates mathematical expressions.</li>
+                        <li><strong class="text-[var(--venus-violet)]">Conversational Fallback:</strong> Answers general questions when no specific tool is needed.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-lg text-white mb-1">Tech Stack</h3>
+                    <p><strong class="text-[var(--venus-violet)]">Backend:</strong> Python (FastAPI), deployed on Vercel Serverless.</p>
+                    <p><strong class="text-[var(--venus-violet)]">Frontend:</strong> HTML, JavaScript, Tailwind CSS.</p>
+                    <p><strong class="text-[var(--venus-violet)]">AI:</strong> Groq (LLM for reasoning), Prompt Engineering.</p>
+                    <p><strong class="text-[var(--venus-violet)]">APIs:</strong> NewsAPI, Alpha Vantage, Open-Meteo, Wikipedia.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatForm = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message-input');
+        const chatContainer = document.getElementById('chat-container');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const sendButton = document.getElementById('send-button');
+        
+        const infoButton = document.getElementById('info-button');
+        const infoModal = document.getElementById('info-modal');
+        const closeModalButton = document.getElementById('close-modal-button');
+        const modalBackdrop = document.getElementById('modal-backdrop');
+
+        let conversationHistory = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+             appendMessage('assistant', 'Hello! How can I help you today? I can get news, weather, stock prices, and more.');
+        });
+
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            sendMessage();
+        });
+
+        async function sendMessage() {
+            const userMessage = messageInput.value.trim();
+            if (!userMessage) return;
+
+            conversationHistory.push({ role: 'user', content: userMessage });
+            
+            appendMessage('user', userMessage);
+            messageInput.value = '';
+            
+            typingIndicator.classList.remove('hidden');
+            chatContainer.appendChild(typingIndicator);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            sendButton.disabled = true;
+
+            try {
+                const focusedHistory = conversationHistory.slice(-6);
+
+                const response = await fetch('/orchestrate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        query: userMessage,
+                        history: focusedHistory 
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+
+                const data = await response.json();
+                const botMessage = data.result;
+                
+                conversationHistory.push({ role: 'assistant', content: botMessage });
+
+                appendMessage('assistant', botMessage);
+            } catch (error) {
+                console.error('Error:', error);
+                const errorMessage = `Sorry, an error occurred. Please try again.`;
+                appendMessage('assistant', errorMessage, true);
+                conversationHistory.push({ role: 'assistant', content: "An error occurred." });
+            } finally {
+                typingIndicator.classList.add('hidden');
+                sendButton.disabled = false;
+                messageInput.focus();
+            }
+        }
+
+        function appendMessage(sender, text, isError = false) {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.classList.add('flex', 'items-start', 'gap-3', 'animate-fade-in-up');
+            if (sender === 'user') {
+                messageWrapper.classList.add('justify-end');
+            }
+
+            const iconDiv = document.createElement('div');
+            iconDiv.classList.add('w-10', 'h-10', 'rounded-full', 'flex', 'items-center', 'justify-center', 'flex-shrink-0');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('p-3', 'rounded-lg', 'shadow-md', 'max-w-lg');
+            
+            if (sender === 'user') {
+                iconDiv.classList.add('bg-[var(--venus-violet)]');
+                iconDiv.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+                messageDiv.classList.add('bg-[var(--brandywine-raspberry)]');
+                messageDiv.textContent = text;
+                messageWrapper.appendChild(messageDiv);
+                messageWrapper.appendChild(iconDiv);
+            } else {
+                iconDiv.classList.add('bg-[var(--brandywine-raspberry)]');
+                iconDiv.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="m12 3-1.9 4.8-4.8 1.9 4.8 1.9L12 16l1.9-4.8 4.8-1.9-4.8-1.9z"/><path d="M5 21v-4"/><path d="M3 19h4"/><path d="M19 21v-4"/><path d="M17 19h4"/></svg>`;
+                if (isError) {
+                    messageDiv.classList.add('bg-[var(--emotional)]', 'text-white', 'shake');
+                } else {
+                    messageDiv.classList.add('bg-[var(--queens-tart)]', 'text-black');
+                }
+                messageDiv.innerHTML = marked.parse(text);
+                messageWrapper.appendChild(iconDiv);
+                messageWrapper.appendChild(messageDiv);
+            }
+            
+            chatContainer.insertBefore(messageWrapper, typingIndicator);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes fade-in-up {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .animate-fade-in-up { animation: fade-in-up 0.4s ease-out forwards; }
+        `;
+        document.head.appendChild(style);
+
+        messageInput.addEventListener('focus', () => messageInput.classList.add('focus-glow'));
+        messageInput.addEventListener('blur', () => messageInput.classList.remove('focus-glow'));
+
+        // Modal Logic
+        function openModal() {
+            infoModal.classList.remove('hidden');
+            infoModal.querySelector('.relative').classList.add('modal-panel-animate-in');
+            infoModal.querySelector('.relative').classList.remove('modal-panel-animate-out');
+            modalBackdrop.classList.add('modal-animate-in');
+            modalBackdrop.classList.remove('modal-animate-out');
+        }
+
+        function closeModal() {
+            infoModal.querySelector('.relative').classList.remove('modal-panel-animate-in');
+            infoModal.querySelector('.relative').classList.add('modal-panel-animate-out');
+            modalBackdrop.classList.remove('modal-animate-in');
+            modalBackdrop.classList.add('modal-animate-out');
+            setTimeout(() => {
+                infoModal.classList.add('hidden');
+            }, 300);
+        }
+
+        infoButton.addEventListener('click', openModal);
+        closeModalButton.addEventListener('click', closeModal);
+        modalBackdrop.addEventListener('click', closeModal);
+    </script>
+</body>
+</html>
+
+

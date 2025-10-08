@@ -1,0 +1,18 @@
+#Web Framework
+fastapi==0.118.0
+uvicorn==0.37.0
+pydantic==2.11.9
+
+#Environment & API Calls
+python-dotenv==1.1.1
+requests==2.32.5
+
+#Agent Tools
+newsapi-python==0.2.7
+alpha-vantage==2.3.1
+wikipedia==1.4.0
+
+#Weather Tool Dependencies
+openmeteo-requests==1.7.3
+requests-cache==1.2.1
+retry-requests==2.0.0
