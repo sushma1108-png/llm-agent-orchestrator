@@ -6,7 +6,7 @@ Live Demo Link --> https://sushmas-llm-agent-orchestrator.vercel.app/
 Overview
 This project is more than a simple chatbot. It is an intelligent agent built on a modern, tool-using architecture. When a user sends a query, a Large Language Model (LLM) acts as a reasoning engine or "brain" to determine the user's intent. Based on this intent, it dynamically selects the appropriate tool—such as fetching live weather data, retrieving stock prices, or searching for news—and executes it. This allows the agent to go beyond pre-programmed responses and interact with real-world data and services.
 
-Key Features
+Key Features:
 Intelligent Tool Selection: Uses an LLM (Groq) for advanced function calling, allowing the agent to dynamically choose the right tool for any given query.
 
 Multi-Tool Capability: Equipped with a suite of tools to perform diverse tasks:
@@ -61,4 +61,4 @@ Open-Meteo
 
 Wikipedia
 
-Grok XAI
+GROK XAI

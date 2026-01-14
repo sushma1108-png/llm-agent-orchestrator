@@ -1,0 +1,17 @@
+# Ignore the local virtual environment folder
+venv/
+.venv/
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+
+# Ignore Git and other local config
+.git/
+.vscode/
+
+# Ignore large data or model files
+data/
+models/
+*.pkl
+*.bin
